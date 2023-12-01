@@ -1,9 +1,7 @@
 package com.adventofcode.day1;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import com.adventofcode.utils.ReaderUtil;
 
@@ -23,7 +21,6 @@ public class Day1 {
             StringBuilder beginningBuilder = new StringBuilder();
             StringBuilder endBuilder = new StringBuilder();
             StringBuilder resultBuilder = new StringBuilder();
-            //StringBuilder currentLine = new StringBuilder();
             for(int i=0; resultBuilder.length() == 0; i++){
                 if(Character.isDigit(line.charAt(i))){
                     resultBuilder.append(line.charAt(i));
@@ -53,25 +50,5 @@ public class Day1 {
             return resultBuilder.toString();
         }).toList();
         System.out.println(cleanedLines.stream().mapToInt(Integer::parseInt).sum());
-        /*List<String> cleanedLines = lines.stream().map(line -> {
-            StringBuilder currentLine = new StringBuilder();
-            StringBuilder resultBuilder = new StringBuilder();
-            for(Character c : line.toCharArray()) {
-                if(Character.isDigit(c)) {
-                    resultBuilder.append(c);
-                    currentLine.setLength(0);
-                }else{
-                    currentLine.append(c);
-                    wordDigitsList.stream().forEach(word -> {
-                        if(currentLine.toString().contains(word)) {
-                            resultBuilder.append(Integer.toString(wordDigitsList.indexOf(word) + 1));
-                            currentLine.setLength(0);
-                        }
-                    });
-                }
-            }
-           return resultBuilder.toString(); 
-        }).toList();
-        System.out.println(cleanedLines);*/
     }
 }
