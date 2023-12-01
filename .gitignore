@@ -1,0 +1,27 @@
+# Maven
+target/
+*.iml
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+
+# IDE files
+.vscode/
+*.ipr
+*.iws
+*.iml
+
+# Compiled class file
+*.class
+
+# Logs
+log/
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
