@@ -77,9 +77,11 @@
                 </execution>
             </executions>
             <configuration>
-                <mainClass>${exec.mainClass}</mainClass>
+                <mainClass>com.adventofcode.App</mainClass>
                 <arguments>
-                  <argument>${exec.taskNr}</argument>
+                  <argument>${exec.day}</argument>
+                  <argument>${exec.task}</argument>
+                  <argument>${exec.input}</argument>
                 </arguments>
             </configuration>
         </plugin>
