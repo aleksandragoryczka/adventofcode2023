@@ -1,20 +1,21 @@
-package com.adventofcode.day1;
+package com.adventofcode.days;
+
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.adventofcode.utils.ReaderUtil;
 
-public class Day1 {
+public class Day01 {
     public static void task1(String filePath) {
-        List<String> lines = ReaderUtil.readLinyByLineToList(filePath);
+        List<String> lines = ReaderUtil.readLineByLineToList(filePath);
         List<String> cleanedLines = lines.stream().map(line -> line.replaceAll("[^0-9]", "")).toList();
         int calibrationValuesSum = cleanedLines.stream().map(line -> String.valueOf(line.charAt(0)) + String.valueOf(line.charAt(line.length() - 1))).mapToInt(Integer::parseInt).sum();
         System.out.println(calibrationValuesSum);
     }
 
     public static void task2(String filePath) {
-        List<String> lines = ReaderUtil.readLinyByLineToList(filePath);
+        List<String> lines = ReaderUtil.readLineByLineToList(filePath);
         List<String> wordDigitsList = Arrays.asList("one", "two", "three", "four", "five", "six", "seven", "eight", "nine");
 
         List<String> cleanedLines = lines.stream().map(line -> {
