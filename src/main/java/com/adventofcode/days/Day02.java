@@ -30,6 +30,24 @@ public class Day02 {
     }
 
     public static void task2(String filePath){
-
+        String[] lines = ReaderUtil.readLineByLineToList(filePath).toArray(new String[0]);
+        int gamesSum = 0;
+        for(String line : lines){
+            String[] splittedLine = line.split("[;,]\\s*|(:\\s)");
+            HashMap<String, Integer> maxCubesInGame = new HashMap<String, Integer>();
+            for(String cube : Arrays.copyOfRange(splittedLine, 1, splittedLine.length)){
+                String[] splittedCube = cube.split(" ");
+                
+                if(maxCubesInGame.containsKey(splittedCube[1])){
+                    if(maxCubesInGame.get(splittedCube[1]) < Integer.parseInt(splittedCube[0])){
+                        maxCubesInGame.put(splittedCube[1], Integer.parseInt(splittedCube[0]));
+                    }
+                }else{
+                    maxCubesInGame.put(splittedCube[1], Integer.parseInt(splittedCube[0]));
+                }
+            }
+            gamesSum += maxCubesInGame.values().stream().reduce(1, (a, b) -> a * b);
+        }
+        System.out.println(gamesSum);
     }
 }
