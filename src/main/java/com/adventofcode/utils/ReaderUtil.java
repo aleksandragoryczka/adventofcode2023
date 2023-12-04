@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReaderUtil {
-    public static List<String> readLineByLineToList(String filePath){
+    public static List<String> readLineByLineToList(String filePath) {
         BufferedReader bufferedReader;
         List<String> lines = new ArrayList<String>();
-        
+
         try {
             bufferedReader = new BufferedReader(new FileReader(filePath));
             String line = bufferedReader.readLine();
-            while(line != null){
+            while (line != null) {
                 lines.add(line);
                 line = bufferedReader.readLine();
             }
@@ -28,15 +28,15 @@ public class ReaderUtil {
         return lines;
     }
 
-    public static String[] readLineByLineToArray(String filePath){
+    public static String[] readLineByLineToArray(String filePath) {
         BufferedReader bufferedReader;
         String[] lines = new String[0];
-        
+
         try {
             bufferedReader = new BufferedReader(new FileReader(filePath));
             String line = bufferedReader.readLine();
             List<String> list = new ArrayList<String>();
-            while(line != null){
+            while (line != null) {
                 list.add(line);
                 line = bufferedReader.readLine();
             }
@@ -49,5 +49,5 @@ public class ReaderUtil {
         }
         return lines;
     }
-    
+
 }
