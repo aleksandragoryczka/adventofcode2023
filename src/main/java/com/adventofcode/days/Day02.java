@@ -2,7 +2,6 @@ package com.adventofcode.days;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.adventofcode.utils.ReaderUtil;
