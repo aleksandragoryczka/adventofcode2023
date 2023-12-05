@@ -1,6 +1,5 @@
 package com.adventofcode.days;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,9 +10,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-
-import org.w3c.dom.ranges.Range;
 
 import com.adventofcode.utils.ReaderUtil;
 
@@ -22,20 +18,14 @@ public class Day05 {
         List<String> lines = ReaderUtil.readLineByLineToList(filePath);
         List<Long> firstLineSeeds = Arrays.stream(extractNumbers(lines.get(0))).mapToLong(Long::parseLong).boxed()
                 .toList();
-        List<List<List<Long>>> convertNumbersRules = parseDataLines(lines.subList(3, lines.size()));
 
-        Queue<HashMap<List<Long>, Long>> sourceDestinationMappingQueue = new LinkedList<HashMap<List<Long>, Long>>();
-        for (List<List<Long>> section : convertNumbersRules) {
-            HashMap<List<Long>, Long> sourceDestinationMap = new HashMap<>();
-            for (List<Long> rule : section) {
-                sourceDestinationMap.put(Arrays.asList(rule.get(1), rule.get(1) + rule.get(2) - 1), rule.get(0));
-            }
-            sourceDestinationMappingQueue.add(sourceDestinationMap);
-        }
+        Queue<HashMap<List<Long>, Long>> sourceDestinationMappingQueue = convertNumbersRules(lines);
+
         while (!sourceDestinationMappingQueue.isEmpty()) {
             HashMap<List<Long>, Long> poppedMapping = sourceDestinationMappingQueue.poll();
             firstLineSeeds = firstLineSeeds.stream().map(num -> getMappingForNumber(num, poppedMapping)).toList();
         }
+
         System.out.println(firstLineSeeds.stream().min(Long::compareTo).get());
     }
 
@@ -47,8 +37,26 @@ public class Day05 {
                 .mapToObj(i -> Arrays.asList(firstLineSeeds.get(i),
                         firstLineSeeds.get(i) + firstLineSeeds.get(i + 1) - 1))
                 .toList();
-        List<List<List<Long>>> convertNumbersRules = parseDataLines(lines.subList(3, lines.size()));
+
+        Queue<HashMap<List<Long>, Long>> sourceDestinationMappingQueue = convertNumbersRules(lines);
+        long mappedMinFromGroupedFirstLineSeeds = 0;
+        while (!sourceDestinationMappingQueue.isEmpty()) {
+            HashMap<List<Long>, Long> poppedMapping = sourceDestinationMappingQueue.poll();
+            if (sourceDestinationMappingQueue.isEmpty()) {
+                long minFromGroupedFirstLineSeeds = groupedFirstLineSeeds.stream()
+                        .flatMapToLong(list -> list.stream().mapToLong(Long::longValue)).min().getAsLong();
+                mappedMinFromGroupedFirstLineSeeds = getMappingForNumber(minFromGroupedFirstLineSeeds, poppedMapping);
+            }
+            groupedFirstLineSeeds = groupedFirstLineSeeds.stream()
+                    .flatMap(range -> getMappingForRange(range, poppedMapping).stream()).collect(Collectors.toList());
+        }
+        System.out.println(Math.min(mappedMinFromGroupedFirstLineSeeds, groupedFirstLineSeeds.stream()
+                .map(innerList -> innerList.get(0)).toList().stream().min(Long::compareTo).get()));
+    }
+
+    private static Queue<HashMap<List<Long>, Long>> convertNumbersRules(List<String> lines) {
         Queue<HashMap<List<Long>, Long>> sourceDestinationMappingQueue = new LinkedList<HashMap<List<Long>, Long>>();
+        List<List<List<Long>>> convertNumbersRules = parseDataLines(lines.subList(3, lines.size()));
         for (List<List<Long>> section : convertNumbersRules) {
             HashMap<List<Long>, Long> sourceDestinationMap = new HashMap<>();
             for (List<Long> rule : section) {
@@ -56,15 +64,7 @@ public class Day05 {
             }
             sourceDestinationMappingQueue.add(sourceDestinationMap);
         }
-
-        while (!sourceDestinationMappingQueue.isEmpty()) {
-            HashMap<List<Long>, Long> poppedMapping = sourceDestinationMappingQueue.poll();
-            groupedFirstLineSeeds = groupedFirstLineSeeds.stream()
-                    .flatMap(range -> getMappingForRange(range, poppedMapping).stream()).toList();
-        }
-        List<Long> result = groupedFirstLineSeeds.stream().map(innerList -> innerList.get(0)).toList();
-
-        System.out.println(result.stream().min(Long::compareTo).get());
+        return sourceDestinationMappingQueue;
     }
 
     private static List<List<Long>> getMappingForRange(List<Long> firstLineSeedsRange,
@@ -81,7 +81,8 @@ public class Day05 {
 
             long startRange = firstLineSeedsRange.get(0);
             long endRange = firstLineSeedsRange.get(1);
-            if (startRange <= endKey && startKey <= endRange) {
+
+            if (startRange <= endKey && endRange >= startKey) {
                 HashMap<List<Long>, Long> singleEntryMap = new HashMap<>();
                 singleEntryMap.put(key, entry.getValue());
                 Long overLapStart = Math.max(startKey, startRange);
@@ -96,24 +97,6 @@ public class Day05 {
                     firstLineSeedsRange.get(1)));
         }
         return result;
-    }
-
-    private static Long getLowestLocationNumber(List<Long> firstLineSeeds, List<String> lines) {
-        List<List<List<Long>>> convertNumbersRules = parseDataLines(lines.subList(3, lines.size()));
-
-        Queue<HashMap<List<Long>, Long>> sourceDestinationMappingQueue = new LinkedList<HashMap<List<Long>, Long>>();
-        for (List<List<Long>> section : convertNumbersRules) {
-            HashMap<List<Long>, Long> sourceDestinationMap = new HashMap<>();
-            for (List<Long> rule : section) {
-                sourceDestinationMap.put(Arrays.asList(rule.get(1), rule.get(1) + rule.get(2) - 1), rule.get(0));
-            }
-            sourceDestinationMappingQueue.add(sourceDestinationMap);
-        }
-        while (!sourceDestinationMappingQueue.isEmpty()) {
-            HashMap<List<Long>, Long> poppedMapping = sourceDestinationMappingQueue.poll();
-            firstLineSeeds = firstLineSeeds.stream().map(num -> getMappingForNumber(num, poppedMapping)).toList();
-        }
-        return firstLineSeeds.stream().min(Long::compareTo).get();
     }
 
     private static Long getMappingForNumber(Long num, HashMap<List<Long>, Long> mapping) {
