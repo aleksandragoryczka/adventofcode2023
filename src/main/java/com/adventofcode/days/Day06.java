@@ -29,7 +29,6 @@ public class Day06 {
                 .collect(Collectors.toList());
 
         countResults(Arrays.asList(numbersList.get(0)), Arrays.asList(numbersList.get(1)));
-
     }
 
     private static void countResults(List<Long> timesList, List<Long> distancesList) {
