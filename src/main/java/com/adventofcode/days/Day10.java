@@ -1,5 +1,6 @@
 package com.adventofcode.days;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -60,6 +61,8 @@ public class Day10 {
             '7', List.of('|', 'L', 'J', 'S'),
             'F', List.of('|', 'L', 'J', 'S'));
 
+    private final static List<Character> cornersList = List.of('L', 'J', '7', 'F');
+
     public static void task1(String filePath) {
         List<String> lines = ReaderUtil.readLineByLineToList(filePath);
         List<List<Character>> matrix = lines.stream().map(line -> line.chars().mapToObj(c -> (char) c).toList())
@@ -81,7 +84,41 @@ public class Day10 {
     }
 
     public static void task2(String filePath) {
+        List<String> lines = ReaderUtil.readLineByLineToList(filePath);
+        List<List<Character>> matrix = lines.stream().map(line -> line.chars().mapToObj(c -> (char) c).toList())
+                .toList();
 
+        int[] indexes = getSIndexes(matrix);
+        AtomicInteger rowIndex = new AtomicInteger(indexes[0]);
+        AtomicInteger columnIndex = new AtomicInteger(indexes[1]);
+        int stepsCounter = 1;
+        List<List<Integer>> cornersCoordinates = new ArrayList<List<Integer>>();
+
+        FieldState currentFieldState = makeNextSteps(matrix, new FieldState(
+                'S', columnIndex, rowIndex, columnIndex.get(), rowIndex.get()));
+
+        while (currentFieldState.currentChar != 'S') {
+            Character c = currentFieldState.currentChar;
+            if (cornersList.stream().anyMatch(val -> val.equals(c))) {
+                cornersCoordinates.add(List.of(currentFieldState.columnIndex.get(), currentFieldState.rowIndex.get()));
+            }
+            stepsCounter++;
+            currentFieldState = makeNextSteps(matrix, currentFieldState);
+        }
+
+        int pickFormulaResult = shoelaceFormula(cornersCoordinates) - stepsCounter / 2 + 1;
+        System.out.println(pickFormulaResult);
+    }
+
+    private static int shoelaceFormula(List<List<Integer>> cornersCoordinates) {
+        int sum = 0;
+        for (int i = 0; i < cornersCoordinates.size() - 1; i++) {
+            sum += cornersCoordinates.get(i).get(0) * cornersCoordinates.get(i + 1).get(1)
+                    - cornersCoordinates.get(i + 1).get(0) * cornersCoordinates.get(i).get(1);
+        }
+        sum += cornersCoordinates.get(cornersCoordinates.size() - 1).get(0) * cornersCoordinates.get(0).get(1)
+                - cornersCoordinates.get(0).get(0) * cornersCoordinates.get(cornersCoordinates.size() - 1).get(1);
+        return Math.abs(sum / 2);
     }
 
     private static int[] getSIndexes(List<List<Character>> matrix) {
@@ -110,27 +147,21 @@ public class Day10 {
                 && prevColumnIndex != currentColumnIndex + 1) {
             currentFieldState = updateFieldState(currentFieldState, currentColumnIndex + 1, currentRowIndex,
                     matrix.get(currentRowIndex).get(currentColumnIndex + 1));
-            System.out.println("right");
         } else if (leftMap.get(currentChar).stream()
                 .anyMatch(x -> x.equals(matrix.get(currentRowIndex).get(currentColumnIndex - 1)))
                 && prevColumnIndex != currentColumnIndex - 1) {
             currentFieldState = updateFieldState(currentFieldState, currentColumnIndex - 1, currentRowIndex,
                     matrix.get(currentRowIndex).get(currentColumnIndex - 1));
-            System.out.println("left");
         } else if (upMap.get(currentChar).stream()
                 .anyMatch(x -> x.equals(matrix.get(currentRowIndex - 1).get(currentColumnIndex)))
                 && prevRowIndex != currentRowIndex - 1) {
             currentFieldState = updateFieldState(currentFieldState, currentColumnIndex, currentRowIndex - 1,
                     matrix.get(currentRowIndex - 1).get(currentColumnIndex));
-            System.out.println("up");
-            System.out.println("prevColumnIndex: " + prevColumnIndex + " prevRowIndex: " + prevRowIndex);
-            System.out.println("nowy char: " + currentChar);
         } else if (downMap.get(currentChar).stream()
                 .anyMatch(x -> x.equals(matrix.get(currentRowIndex + 1).get(currentColumnIndex)))
                 && prevRowIndex != currentRowIndex + 1) {
             currentFieldState = updateFieldState(currentFieldState, currentColumnIndex, currentRowIndex + 1,
                     matrix.get(currentRowIndex + 1).get(currentColumnIndex));
-            System.out.println("prevColumnIndex: " + prevColumnIndex + " prevRowIndex: " + prevRowIndex);
         }
         return currentFieldState;
     }
