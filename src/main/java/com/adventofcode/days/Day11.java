@@ -13,8 +13,8 @@ public class Day11 {
         List<List<Character>> charsMatrix = lines.stream().map(line -> line.chars().mapToObj(c -> (char) c).toList())
                 .toList();
         List<List<Integer>> startCoordinateList = getStartIndexes(charsMatrix);
-        List<Integer> startExpandingRowsNumberList = expandRowMilionTimes(lines);
-        List<Integer> startExpandingColumnNumberList = expandColumnMilionTimes(lines);
+        List<Integer> startExpandingRowsNumberList = getExpandedRows(lines);
+        List<Integer> startExpandingColumnNumberList = getExpandedColumns(lines);
         countDistancesWithRates(startCoordinateList, startExpandingRowsNumberList, startExpandingColumnNumberList, 1);
 
     }
@@ -24,8 +24,8 @@ public class Day11 {
         List<List<Character>> charsMatrix = lines.stream().map(line -> line.chars().mapToObj(c -> (char) c).toList())
                 .toList();
         List<List<Integer>> startCoordinateList = getStartIndexes(charsMatrix);
-        List<Integer> startExpandingRowsNumberList = expandRowMilionTimes(lines);
-        List<Integer> startExpandingColumnNumberList = expandColumnMilionTimes(lines);
+        List<Integer> startExpandingRowsNumberList = getExpandedRows(lines);
+        List<Integer> startExpandingColumnNumberList = getExpandedColumns(lines);
         countDistancesWithRates(startCoordinateList, startExpandingRowsNumberList, startExpandingColumnNumberList,
                 999999);
     }
@@ -55,7 +55,7 @@ public class Day11 {
         System.out.println(sum);
     }
 
-    private static List<Integer> expandRowMilionTimes(List<String> lines) {
+    private static List<Integer> getExpandedRows(List<String> lines) {
         List<Integer> startExpandingRowsNumberList = new ArrayList<Integer>();
 
         for (int i = 0; i < lines.size(); i++) {
@@ -66,7 +66,7 @@ public class Day11 {
         return startExpandingRowsNumberList;
     }
 
-    private static List<Integer> expandColumnMilionTimes(List<String> lines) {
+    private static List<Integer> getExpandedColumns(List<String> lines) {
         List<Integer> columnWithDotsIndex = new ArrayList<Integer>();
         for (AtomicInteger i = new AtomicInteger(0); i.get() < lines.get(0).length(); i.incrementAndGet()) {
             if (lines.stream().allMatch(line -> line.charAt(i.get()) == '.')) {
