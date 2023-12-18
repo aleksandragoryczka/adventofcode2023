@@ -6,6 +6,16 @@ import java.util.List;
 import com.adventofcode.utils.ReaderUtil;
 
 public class Day13 {
+    private static class UpdatedField {
+        int finaldIndex;
+        List<List<Character>> pattern;
+
+        public UpdatedField(int finaldIndex, List<List<Character>> pattern) {
+            this.finaldIndex = finaldIndex;
+            this.pattern = pattern;
+        }
+    }
+
     public static void task1(String filePath) {
         List<String> lines = ReaderUtil.readLineByLineToList(filePath);
         List<List<List<Character>>> patterns = readPatterns(lines);
@@ -33,7 +43,48 @@ public class Day13 {
     }
 
     public static void task2(String filePath) {
+        List<String> lines = ReaderUtil.readLineByLineToList(filePath);
+        List<List<List<Character>>> patterns = readPatterns(lines);
+        long sum = 0;
+        for (int i = 0; i < patterns.size(); i++) {
+            for (int j = 0; j < patterns.get(i).size() - 1; j++) {
+                if (checkIfRowsEqual(patterns.get(i).get(j), patterns.get(i).get(j + 1))) {
+                    UpdatedField updatedField = updatePatternCheckReflectionForNextRows(patterns.get(i), j);
+                    sum += updatedField.finaldIndex * 100;
+                    patterns.set(i, updatedField.pattern);
+                }
+            }
+            System.out.println(patterns.get(i));
+            System.out.println(sum);
 
+            for (int k = 0; k < patterns.get(i).get(0).size() - 1; k++) {
+                List<Character> column1 = new ArrayList<Character>();
+                List<Character> column2 = new ArrayList<Character>();
+                for (int j = 0; j < patterns.get(i).size(); j++) {
+                    column1.add(patterns.get(i).get(j).get(k));
+                    column2.add(patterns.get(i).get(j).get(k + 1));
+                }
+                if (checkIfRowsEqual(column1, column2)) {
+                    sum += checkReflectionForNextColumns(patterns.get(i), k);
+                }
+            }
+        }
+        System.out.println(sum);
+    }
+
+    private static List<Character> tryToUpdatePatternByRows(List<Character> row1, List<Character> row2) {
+        int erorrCounter = 0;
+        for (int i = 0; i < row1.size(); i++) {
+            if (!row1.get(i).equals(row2.get(i))) {
+                erorrCounter++;
+            }
+        }
+        if (erorrCounter == 1) {
+            return row1;
+            // System.out.println(erorrCounter);
+            // System.out.println(row1);
+        }
+        return null;
     }
 
     private static int checkReflectionForNextColumns(List<List<Character>> pattern, int startColumnIndex) {
@@ -51,6 +102,30 @@ public class Day13 {
             loopCounter++;
         }
         return startColumnIndex + 1;
+    }
+
+    private static UpdatedField updatePatternCheckReflectionForNextRows(List<List<Character>> pattern,
+            int startRowIndex) {
+        int loopCounter = 1;
+        int errorCounter = 0;
+        // int updatedIndex = -1;
+        List<List<Character>> initialPattern = new ArrayList<>(pattern);
+        while (startRowIndex - loopCounter >= 0 && startRowIndex + 1 + loopCounter < pattern.size()) {
+            if (!checkIfRowsEqual(pattern.get(startRowIndex - loopCounter),
+                    pattern.get(startRowIndex + 1 + loopCounter)) && errorCounter == 0) {
+                List<Character> newRow = tryToUpdatePatternByRows(pattern.get(startRowIndex - loopCounter),
+                        pattern.get(startRowIndex + 1 + loopCounter));
+                if (newRow != null) {
+                    pattern.set(startRowIndex + 1 + loopCounter, newRow);
+                    // updatedIndex
+                    errorCounter++;
+                } else {
+                    return new UpdatedField(0, initialPattern);
+                }
+            }
+            loopCounter++;
+        }
+        return new UpdatedField(startRowIndex + 1, pattern);
     }
 
     private static int checkReflectionForNextRows(List<List<Character>> pattern, int startRowIndex) {
