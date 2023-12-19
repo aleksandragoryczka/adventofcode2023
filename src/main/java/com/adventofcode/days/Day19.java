@@ -116,7 +116,6 @@ public class Day19 {
 
     public static void task1(String filePath) {
         List<String> lines = ReaderUtil.readLineByLineToList(filePath);
-       // System.out.println(lines);
 
         HashMap<String, ConditionsList> workflowsMap = new HashMap<String, ConditionsList>();
         List<Part> partList = new ArrayList<Part>();
@@ -140,19 +139,15 @@ public class Day19 {
             } else if (line.startsWith("{") && !line.isEmpty()) {
                 int[] numbers = extractNumbersForPart(line);
                 partList.add(new Part(numbers[0], numbers[1], numbers[2], numbers[3]));
-                // workflowsMap.put(line, new ConditionsList());
             }
         }
-        // System.out.println(workflowsMap);
         int sum = 0;
         for (Part part : partList) {
-            //System.out.println(part);
             ConditionsList condition = workflowsMap.get("in");
             String comparingResult = condition.compareConditions(part);
             while (!comparingResult.equals("A") && !comparingResult.equals("R")) {
                 condition = workflowsMap.get(comparingResult);
                 comparingResult = condition.compareConditions(part);
-                //System.out.println("comparing result: " + comparingResult);
             }
             if (comparingResult.equals("A")) {
                 sum += part.getSumOfRating();
