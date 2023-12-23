@@ -2,20 +2,11 @@ package com.adventofcode.days;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.adventofcode.utils.ReaderUtil;
 
 public class Day13 {
-    private static class UpdatedField {
-        int finaldIndex;
-        List<List<Character>> pattern;
-
-        public UpdatedField(int finaldIndex, List<List<Character>> pattern) {
-            this.finaldIndex = finaldIndex;
-            this.pattern = pattern;
-        }
-    }
-
     public static void task1(String filePath) {
         List<String> lines = ReaderUtil.readLineByLineToList(filePath);
         List<List<List<Character>>> patterns = readPatterns(lines);
@@ -44,47 +35,49 @@ public class Day13 {
 
     public static void task2(String filePath) {
         List<String> lines = ReaderUtil.readLineByLineToList(filePath);
-        List<List<List<Character>>> patterns = readPatterns(lines);
-        long sum = 0;
-        for (int i = 0; i < patterns.size(); i++) {
-            for (int j = 0; j < patterns.get(i).size() - 1; j++) {
-                if (checkIfRowsEqual(patterns.get(i).get(j), patterns.get(i).get(j + 1))) {
-                    UpdatedField updatedField = updatePatternCheckReflectionForNextRows(patterns.get(i), j);
-                    sum += updatedField.finaldIndex * 100;
-                    patterns.set(i, updatedField.pattern);
-                }
-            }
-            System.out.println(patterns.get(i));
-            System.out.println(sum);
+        List<List<List<Character>>> rowPatterns = readPatterns(lines);
+        List<List<List<Character>>> columnPatterns = readPatternsByColumns(lines);
 
-            for (int k = 0; k < patterns.get(i).get(0).size() - 1; k++) {
-                List<Character> column1 = new ArrayList<Character>();
-                List<Character> column2 = new ArrayList<Character>();
-                for (int j = 0; j < patterns.get(i).size(); j++) {
-                    column1.add(patterns.get(i).get(j).get(k));
-                    column2.add(patterns.get(i).get(j).get(k + 1));
-                }
-                if (checkIfRowsEqual(column1, column2)) {
-                    sum += checkReflectionForNextColumns(patterns.get(i), k);
-                }
+        long sum = 0;
+        for (int i = 0; i < rowPatterns.size(); i++) {
+            int foundIndex = checkIfOneSmudge(rowPatterns.get(i));
+            if (foundIndex > 0) {
+                sum += foundIndex * 100;
+            } else {
+                foundIndex = checkIfOneSmudge(columnPatterns.get(i));
+                sum += foundIndex;
             }
         }
         System.out.println(sum);
     }
 
-    private static List<Character> tryToUpdatePatternByRows(List<Character> row1, List<Character> row2) {
-        int erorrCounter = 0;
+    private static int countNotMatchedDigits(List<Character> row1, List<Character> row2) {
+        int countNotMatchedDigits = 0;
         for (int i = 0; i < row1.size(); i++) {
             if (!row1.get(i).equals(row2.get(i))) {
-                erorrCounter++;
+                countNotMatchedDigits++;
             }
         }
-        if (erorrCounter == 1) {
-            return row1;
-            // System.out.println(erorrCounter);
-            // System.out.println(row1);
+        return countNotMatchedDigits;
+    }
+
+    private static int checkIfOneSmudge(List<List<Character>> pattern) {
+        for (AtomicInteger j = new AtomicInteger(0); j.get() < pattern.size() - 1; j
+                .getAndIncrement()) {
+            List<List<Character>> firstPart = pattern.subList(0, j.get() + 1);
+
+            List<List<Character>> secondPart = pattern.subList(j.get() + 1,
+                    j.get() + firstPart.size() + 1 > pattern.size() ? pattern.size() : j.get() + firstPart.size() + 1);
+            int differentSignsCount = 0;
+            for (int k = 0; k < secondPart.size(); k++) {
+                differentSignsCount += countNotMatchedDigits(secondPart.get(k),
+                        firstPart.get(firstPart.size() - 1 - k));
+            }
+            if (differentSignsCount == 1) {
+                return (j.get() + 1);
+            }
         }
-        return null;
+        return 0;
     }
 
     private static int checkReflectionForNextColumns(List<List<Character>> pattern, int startColumnIndex) {
@@ -104,28 +97,33 @@ public class Day13 {
         return startColumnIndex + 1;
     }
 
-    private static UpdatedField updatePatternCheckReflectionForNextRows(List<List<Character>> pattern,
-            int startRowIndex) {
-        int loopCounter = 1;
-        int errorCounter = 0;
-        // int updatedIndex = -1;
-        List<List<Character>> initialPattern = new ArrayList<>(pattern);
-        while (startRowIndex - loopCounter >= 0 && startRowIndex + 1 + loopCounter < pattern.size()) {
-            if (!checkIfRowsEqual(pattern.get(startRowIndex - loopCounter),
-                    pattern.get(startRowIndex + 1 + loopCounter)) && errorCounter == 0) {
-                List<Character> newRow = tryToUpdatePatternByRows(pattern.get(startRowIndex - loopCounter),
-                        pattern.get(startRowIndex + 1 + loopCounter));
-                if (newRow != null) {
-                    pattern.set(startRowIndex + 1 + loopCounter, newRow);
-                    // updatedIndex
-                    errorCounter++;
-                } else {
-                    return new UpdatedField(0, initialPattern);
+    private static List<List<List<Character>>> readPatternsByColumns(List<String> lines) {
+        List<List<List<Character>>> patterns = new ArrayList<List<List<Character>>>();
+        List<List<Character>> currentPattern = new ArrayList<List<Character>>();
+
+        for (int i = 0; i < lines.size(); i++) {
+            if (!lines.get(i).isEmpty()) {
+                for (int j = 0; j < lines.get(i).length(); j++) {
+
+                    if (currentPattern.size() <= j) {
+                        List<Character> newColumn = new ArrayList<>();
+                        newColumn.add(lines.get(i).charAt(j));
+                        currentPattern.add(j, newColumn);
+                    } else {
+                        List<Character> existingColumn = currentPattern.get(j);
+                        existingColumn.add(lines.get(i).charAt(j));
+                        currentPattern.set(j, existingColumn);
+                    }
                 }
+            } else {
+                patterns.add(new ArrayList<List<Character>>(currentPattern));
+                currentPattern = new ArrayList<List<Character>>();
             }
-            loopCounter++;
         }
-        return new UpdatedField(startRowIndex + 1, pattern);
+        if (!currentPattern.isEmpty()) {
+            patterns.add(new ArrayList<List<Character>>(currentPattern));
+        }
+        return patterns;
     }
 
     private static int checkReflectionForNextRows(List<List<Character>> pattern, int startRowIndex) {
@@ -175,6 +173,5 @@ public class Day13 {
             patternRow.add(c);
         }
         return patternRow;
-
     }
 }
